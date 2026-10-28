@@ -69,6 +69,15 @@ device:
     device_type: 'A2HYAJ0FEWP6N3'
     device_name: '%FIRST_NAME%''s%DUPE_STRATEGY_1ST% MTC'
     device_serial: 'e6eb1ecdc8e34320'
+  mytv:
+    domain: Device
+    app_name: com.amazon.amazonvideo.livingroom
+    app_version: '1.4'
+    device_model: 'MTC'
+    os_version: '6.0.1' #6.10.19
+    device_type: 'A2HYAJ0FEWP6N3'
+    device_name: '%FIRST_NAME%''s%DUPE_STRATEGY_1ST% MTC'
+    device_serial: 'e6eb1ecdc8e34320'
 
 #Hisense_HU32E5600FHWV:  A2RGJ95OVLR12U
 #Hisense_HU50A6100UW:  AAJ692ZPT1X85

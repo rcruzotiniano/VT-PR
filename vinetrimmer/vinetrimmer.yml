@@ -10,7 +10,7 @@ aria2c:
   file_allocation: 'prealloc'
 
 cdm:
-  default: 'hisense_smarttv_he55a7000euwts_sl3000'
+  default: 'mtc_mtc_atv_atv_sl3000'
   Amazon: 'mtc_mtc_atv_atv_sl3000'
   AppleTVPlus: 'mtc_mtc_atv_atv_sl3000'
   Hotstar: 'xiaomi_mi_a1_15.0.0_60ceee88_8159_l3'

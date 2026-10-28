@@ -1247,11 +1247,9 @@ class Amazon(BaseService):
 						"Cookies are signed out, cannot get ontv CSRF token. "
 						f"Expecting profile to have cookies for: {self.endpoints['ontv']}"
 					)
-				for match in re.finditer(r"<script type=\"text/template\">(.+)</script>", response):
-					prop = json.loads(match.group(1))
-					prop = prop.get("props", {}).get("codeEntry", {}).get("token")
-					if prop:
-						return prop, self.endpoints["ontv"]
+				prop = self.find_csrf_token(response)
+				if prop:
+					return prop, self.endpoints["ontv"]
 				raise self.log.exit(f"Unable to get ontv CSRF token - Navigate to {self.endpoints['mytv']}, login and save cookies from code pair page to default.txt")
 			except:
 				res = self.session.get(self.endpoints["ontvold"])
@@ -1261,12 +1259,43 @@ class Amazon(BaseService):
 						"Cookies are signed out, cannot get ontv CSRF token. "
 						f"Expecting profile to have cookies for: {self.endpoints['ontvold']}"
 					)
-				for match in re.finditer(r"<script type=\"text/template\">(.+)</script>", response):
-					prop = json.loads(match.group(1))
-					prop = prop.get("props", {}).get("codeEntry", {}).get("token")
-					if prop:
-						return prop, self.endpoints["ontvold"]
+				prop = self.find_csrf_token(response)
+				if prop:
+					return prop, self.endpoints["ontvold"]
 				raise self.log.exit(f"Unable to get ontv CSRF token - Navigate to {self.endpoints['mytv']}, login and save cookies from code pair page to default.txt")
+
+		@staticmethod
+		def find_csrf_token(html_text: str) -> str | None:
+			"""
+			Pull the codeEntry CSRF token out of the OnTV (code pair) page.
+
+			Amazon used to serve the props as JSON inside a `<script type="text/template">` block.
+			It's now spread over other script blocks (application/json, a-state, ...), so walk every
+			script block that mentions codeEntry and look for the token inside it.
+			"""
+			for block in re.findall(r"<script[^>]*>(.*?)</script>", html_text, re.S):
+				if "codeEntry" not in block:
+					continue
+				try:
+					data = json.loads(block)
+				except ValueError:
+					continue
+				queue = [data]
+				while queue:
+					item = queue.pop()
+					if isinstance(item, dict):
+						code_entry = item.get("codeEntry")
+						if isinstance(code_entry, dict) and code_entry.get("token"):
+							return code_entry["token"]
+						queue.extend(item.values())
+					elif isinstance(item, list):
+						queue.extend(item)
+			match = re.search(r'"codeEntry"\s*:\s*\{', html_text)
+			if match:
+				token = re.search(r'"token"\s*:\s*"([^"]+)"', html_text[match.end():match.end() + 8000])
+				if token:
+					return token.group(1)
+			return None
 
 		def get_code_pair(self, device: dict) -> dict:
 			"""
